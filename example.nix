@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  defaultUserName = "alice";
+  defaultUserName = "alex";
 in
 
 {

@@ -42,7 +42,7 @@ in
 
 stdenv.mkDerivation rec {
   pname = "sxmo-utils";
-  version = "1.13.0";
+  version = "1.15.2";
 
   src = fetchFromSourcehut {
     owner = "~mil";
