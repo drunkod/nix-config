@@ -2,10 +2,11 @@
 
 let
   defaultUserName = "alex";
+  codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
 in
 
 {
-  codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
+  
   imports = [ ./module.nix ];
   nixpkgs.overlays = [ (import ./overlay.nix) ];
 
