@@ -117,28 +117,6 @@ stdenv.mkDerivation rec {
 
   patches = [
     (fetchpatch {
-      name = "only alias jq=gojq if the latter is available";
-      url = "https://git.uninsane.org/colin/sxmo-utils/commit/e0caaeb4219ba3b92d358a16dfa85bcd09a89adf.patch";
-      hash = "sha256-EuJeHEEmewpipfpEy54pmyBaxhu5KBg7rX5n2kg+iMs=";
-    })
-    (fetchpatch {
-      name = "apps: add Lemoa";
-      url = "https://git.uninsane.org/colin/sxmo-utils/commit/54948ab328d751fc380c7fca032f0b7403070dbf.patch";
-      hash = "sha256-xFvzfz4g9F3VI+wxmrz2aqGokV4YjBRlnnKg5GJbhqA=";
-    })
-    (fetchpatch {
-      name ="apps: add Notejot";
-      url = "https://git.uninsane.org/colin/sxmo-utils/commit/bb862e0f89906c4d59484414f194469626e4c229.patch";
-      hash = "sha256-Sjma5ZKCd3VGk7EzzY5d1JySr3L38nA87pZuMITaxGU=";
-    })
-
-    (fetchpatch {
-      name = "sxmo_migrate: add option to disable configversion checks";
-      url = "https://lists.sr.ht/~mil/sxmo-devel/patches/44155/mbox";
-      hash = "sha256-ZcUD2UWPM8PxGM9TBnGe8JCJgMC72OZYzctDf2o7Ub0=";
-    })
-
-    (fetchpatch {
       # experimental patch to launch apps via `swaymsg exec -- `
       # this allows them to detach from sxmo_appmenu.sh (so, `pstree` looks cleaner)
       # and more importantly they don't inherit the environment of sxmo internals (i.e. PATH).
