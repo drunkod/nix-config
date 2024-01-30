@@ -31,10 +31,10 @@ let
     withBaseWrapper = true;
     withGtkWrapper = true;
     sway-unwrapped = sway-unwrapped.overrideAttrs (super: {
-      # https://github.com/swaywm/sway/pull/7544
+      # https://github.com/swaywm/sway/pull/6455
       patches = (super.patches or [ ]) ++ lib.singleton (fetchpatch {
-        url = "https://patch-diff.githubusercontent.com/raw/swaywm/sway/pull/7544.patch";
-        hash = "sha256-Cff45uIpGJQlHsyBiFN1y5j9qTnzxnxWGyfSbVmtup8=";
+        url = "https://github.com/swaywm/sway/commit/4666d1785bfb6635e6e8604de383c91714bceebc.patch";
+        hash = "sha256-e2++kHvEksPJLVxnOtgidLTMVXQQw8WFXiKTNkVGVW4=";
       });
     });
   };
