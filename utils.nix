@@ -42,20 +42,20 @@ in
 
 stdenv.mkDerivation rec {
   pname = "sxmo-utils";
-  version = "unstable-2024-01-01";
+  version = "1.13.0";
 
   src = fetchFromSourcehut {
     owner = "~mil";
     repo = pname;
-    rev = "9b6aa786a0f9d5a31b10f9faad65c7f3d5a28249";
-    hash = "sha256-bQ8hBU2GeMU5PDI5KcMg5NFFG86X15O94CL5Oq55loQ=";
+    rev = version;
+    hash = "sha256-HNkajPC/spozxRlaP0iMWvOAfriRjl2wo1wdcbVCrkU=";
   };
 
-  patches = [ ];
+  patches = [ ./nerdfonts-3.0.0.patch ];
 
   postPatch = ''
     substituteInPlace Makefile --replace '"$(PREFIX)/bin/{}"' '"$(out)/bin/{}"'
-    #substituteInPlace Makefile --replace '$(DESTDIR)/usr' '$(out)'
+    substituteInPlace Makefile --replace '$(DESTDIR)/usr' '$(out)'
     substituteInPlace setup_config_version.sh --replace "busybox" ""
 
     # A better way than wrapping hundreds of shell scripts (some of which are even meant to be sourced)
@@ -97,20 +97,20 @@ stdenv.mkDerivation rec {
 
     substituteInPlace $(${gnugrep}/bin/grep -rl '\. sxmo_common.sh') \
       --replace ". sxmo_common.sh" ". $out/bin/sxmo_common.sh"
-    #substituteInPlace \
-    #  scripts/core/sxmo_winit.sh \
-    #  scripts/core/sxmo_xinit.sh \
-    #  scripts/core/sxmo_rtcwake.sh \
-    #  scripts/core/sxmo_migrate.sh \
-    #  --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
-    #substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
-    #substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
-    #substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out"
-    #substituteInPlace configs/udev/90-sxmo.rules --replace "/bin" "${busybox}/bin"
-    #substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)'
+    substituteInPlace \
+      scripts/core/sxmo_winit.sh \
+      scripts/core/sxmo_xinit.sh \
+      scripts/core/sxmo_rtcwake.sh \
+      scripts/core/sxmo_migrate.sh \
+      --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
+    substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
+    substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
+    substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out"
+    substituteInPlace configs/udev/90-sxmo.rules --replace "/bin" "${busybox}/bin"
+    substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)'
 
-    #substituteInPlace scripts/core/sxmo_common.sh --replace 'alias rfkill="busybox rfkill"' '#'
-    #substituteInPlace configs/default_hooks/sxmo_hook_desktop_widget.sh --replace "wayout" "proycon-wayout"
+    substituteInPlace scripts/core/sxmo_common.sh --replace 'alias rfkill="busybox rfkill"' '#'
+    substituteInPlace configs/default_hooks/sxmo_hook_desktop_widget.sh --replace "wayout" "proycon-wayout"
   '';
 
   makeFlags = [
