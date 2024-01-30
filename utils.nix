@@ -31,10 +31,10 @@ let
     withBaseWrapper = true;
     withGtkWrapper = true;
     sway-unwrapped = sway-unwrapped.overrideAttrs (super: {
-      # https://github.com/swaywm/sway/pull/6455
+      # https://github.com/swaywm/sway/pull/7544
       patches = (super.patches or [ ]) ++ lib.singleton (fetchpatch {
-        url = "https://github.com/swaywm/sway/commit/4666d1785bfb6635e6e8604de383c91714bceebc.patch";
-        hash = "sha256-e2++kHvEksPJLVxnOtgidLTMVXQQw8WFXiKTNkVGVW4=";
+        url = "https://patch-diff.githubusercontent.com/raw/swaywm/sway/pull/7544.patch";
+        hash = "sha256-09f7f8e6e2291894251ecc81885375cb98fda939f3c67c561b27d26d59adba9f";
       });
     });
   };
@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
     owner = "~mil";
     repo = pname;
     rev = version;
-    hash = "sha256-HNkajPC/spozxRlaP0iMWvOAfriRjl2wo1wdcbVCrkU=";
+    hash = "sha256-HNkajPC/spozxRlaP0iMW35AfriRjl2wo1wdcbVCrkU=";
   };
 
   patches = [ ./nerdfonts-3.0.0.patch ];
