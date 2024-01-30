@@ -34,7 +34,7 @@ let
       # https://github.com/swaywm/sway/pull/7544
       patches = (super.patches or [ ]) ++ lib.singleton (fetchpatch {
         url = "https://patch-diff.githubusercontent.com/raw/swaywm/sway/pull/7544.patch";
-        hash = "sha256-09f7f8e6e2291894251ecc81885375cb98fda939f3c67c561b27d26d59adba9f";
+        hash = "sha256-Cff45uIpGJQlHsyBiFN1y5j9qTnzxnxWGyfSbVmtup8=";
       });
     });
   };
@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
     owner = "~mil";
     repo = pname;
     rev = version;
-    hash = "sha256-HNkajPC/spozxRlaP0iMW35AfriRjl2wo1wdcbVCrkU=";
+    hash = "sha256-dWe8e4RmqWhUfkxHMwREQQg6hvAtNTVhhOu4ft/6C9Y=";
   };
 
   patches = [ ./nerdfonts-3.0.0.patch ];
