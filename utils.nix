@@ -173,6 +173,8 @@ stdenv.mkDerivation rec {
     substituteInPlace scripts/core/sxmo_version.sh \
       --replace "/usr/bin/" ""
 
+    substituteInPlace Makefile --replace '"$(PREFIX)/bin/{}"' '"$(out)/bin/{}"'
+
     # let superd find sxmo service binaries at runtime via PATH
     # TODO: replace with fully-qualified paths
     sed -i 's:ExecStart=/usr/bin/:ExecStart=/usr/bin/env :' \
@@ -204,6 +206,7 @@ stdenv.mkDerivation rec {
     "SYSCONFDIR=${placeholder "out"}/etc"
     "DESTDIR="
     "OPENRC=0"
+    "SERVICEDIR=${placeholder "out"}/lib/systemd/user"
     # TODO: use SERVICEDIR and EXTERNAL_SERVICES=0 to integrate superd/systemd better
   ];
   preInstall = ''
