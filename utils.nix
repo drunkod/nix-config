@@ -24,7 +24,7 @@
 , mako, dunst
 , wob
 , swayidle, xprintidle
-, ness-frontends
+, codemadness-frontends, youtube-dl
 }:
 
 let
@@ -74,7 +74,8 @@ stdenv.mkDerivation rec {
       superd
       file
       mmsd-tng
-      ness-frontends
+      codemadness-frontends # reddit-cli and youtube-cli for sxmo_[reddit|youtube].sh
+      youtube-dl
     ] ++ lib.optionals (!isX) [
       sxmo-sway
       bemenu
