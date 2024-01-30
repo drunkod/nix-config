@@ -24,6 +24,7 @@
 , mako, dunst
 , wob
 , swayidle, xprintidle
+, ness-frontends
 }:
 
 let
@@ -73,6 +74,7 @@ stdenv.mkDerivation rec {
       superd
       file
       mmsd-tng
+      ness-frontends
     ] ++ lib.optionals (!isX) [
       sxmo-sway
       bemenu
