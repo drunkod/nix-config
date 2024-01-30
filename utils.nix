@@ -116,6 +116,7 @@ stdenv.mkDerivation rec {
   };
 
   patches = [
+
     (fetchpatch {
       # experimental patch to launch apps via `swaymsg exec -- `
       # this allows them to detach from sxmo_appmenu.sh (so, `pstree` looks cleaner)
@@ -145,31 +146,63 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    # allow sxmo to source its init file
-    sed -i "s@/etc/profile\.d/sxmo_init.sh@$out/etc/profile.d/sxmo_init.sh@" scripts/core/*.sh
-    # remove absolute paths
-    substituteInPlace scripts/core/sxmo_version.sh \
-      --replace "/usr/bin/" ""
-
     substituteInPlace Makefile --replace '"$(PREFIX)/bin/{}"' '"$(out)/bin/{}"'
+    substituteInPlace Makefile --replace '$(DESTDIR)/usr' '$(out)'
+    substituteInPlace setup_config_version.sh --replace "busybox" ""
 
-    # let superd find sxmo service binaries at runtime via PATH
-    # TODO: replace with fully-qualified paths
-    sed -i 's:ExecStart=/usr/bin/:ExecStart=/usr/bin/env :' \
-      configs/services/*.service \
-      configs/superd/services/*.service
+    # A better way than wrapping hundreds of shell scripts (some of which are even meant to be sourced)
+    sed -i '2i export PATH="'"$out"'/bin:${lib.makeBinPath ([
+      gojq
+      util-linux # setsid, rfkill
+      busybox
+      lisgd
+      pn
+      # mnc
+      # bonsai
+      inotify-tools
+      libnotify
+      light
+      superd
+      file
+      mmsd-tng
+    ] ++ lib.optionals (!isX) [
+      sxmo-sway
+      bemenu
+      foot
+      wvkbd
+      proycon-wayout
+      wtype
+      mako
+      wob
+      swayidle
+    ] ++ lib.optionals isX [
+      dwm
+      dmenu
+      st
+      svkbd
+      conky
+      xdotool
+      dunst
+      xprintidle
+    ])}''${PATH:+:}$PATH"' scripts/core/sxmo_common.sh
+    sed -i '3i export XDG_DATA_DIRS="'"$out"'/share''${XDG_DATA_DIRS:+:}$XDG_DATA_DIRS"' scripts/core/sxmo_common.sh
 
-    # install udev rules to where nix expects
-    substituteInPlace Makefile \
-      --replace "/usr/lib/udev/rules.d" "/etc/udev/rules.d"
-    # avoid relative paths in udev rules
-    substituteInPlace configs/udev/90-sxmo.rules \
-      --replace "/bin/chgrp" "${coreutils}/bin/chgrp" \
-      --replace "/bin/chmod" "${coreutils}/bin/chmod"
-  '' + lib.optionalString preferSystemd ''
-    shopt -s globstar
-    sed -i 's/superctl status "$1" | grep -q started/systemctl --user is-active --quiet "$1"/g' **/*.sh
-    sed -i 's/superctl/systemctl --user/g' **/*.sh
+    substituteInPlace $(${gnugrep}/bin/grep -rl '\. sxmo_common.sh') \
+      --replace ". sxmo_common.sh" ". $out/bin/sxmo_common.sh"
+    substituteInPlace \
+      scripts/core/sxmo_winit.sh \
+      scripts/core/sxmo_xinit.sh \
+      scripts/core/sxmo_rtcwake.sh \
+      scripts/core/sxmo_migrate.sh \
+      --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
+    substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
+    substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
+    substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out"
+    substituteInPlace configs/udev/90-sxmo.rules --replace "/bin" "${busybox}/bin"
+    substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)'
+
+    substituteInPlace scripts/core/sxmo_common.sh --replace 'alias rfkill="busybox rfkill"' '#'
+    substituteInPlace configs/default_hooks/sxmo_hook_desktop_widget.sh --replace "wayout" "proycon-wayout"
   '';
 
   nativeBuildInputs = [
@@ -184,42 +217,8 @@ stdenv.mkDerivation rec {
     "SYSCONFDIR=${placeholder "out"}/etc"
     "DESTDIR="
     "OPENRC=0"
-    "SERVICEDIR=${placeholder "out"}/lib/systemd/user"
     # TODO: use SERVICEDIR and EXTERNAL_SERVICES=0 to integrate superd/systemd better
   ];
-  preInstall = ''
-    # busybox is used by setup_config_version.sh, but placing it in nativeBuildInputs breaks the nix builder
-    PATH="$PATH:${buildPackages.busybox}/bin"
-  '';
-
-  # we don't wrap sxmo_common.sh or sxmo_init.sh
-  # which is unfortunate, for non-sxmo-utils files that might source those.
-  # if that's a problem, could inject a PATH=... line into them with sed.
-  postInstall = ''
-    for f in \
-      $out/bin/*.sh \
-      $out/share/sxmo/default_hooks/desktop/sxmo_hook_*.sh \
-      $out/share/sxmo/default_hooks/one_button_e_reader/sxmo_hook_*.sh \
-      $out/share/sxmo/default_hooks/three_button_touchscreen/sxmo_hook_*.sh \
-      $out/share/sxmo/default_hooks/sxmo_hook_*.sh \
-    ; do
-      case $(basename $f) in
-        (sxmo_common.sh|sxmo_deviceprofile_*.sh|sxmo_hook_icons.sh|sxmo_init.sh)
-          # these are sourced by other scripts: don't wrap them else the `exec` in the nix wrapper breaks the outer script
-        ;;
-        (*)
-          wrapProgram "$f" \
-            --suffix PATH : "${lib.makeBinPath runtimeDeps}"
-        ;;
-      esac
-    done
-  '';
-
-  passthru = {
-    inherit runtimeDeps;
-    providedSessions = (lib.optional supportSway "swmo") ++ (lib.optional supportDwm "sxmo");
-    updateScript = unstableGitUpdater { };
-  };
 
   meta = {
     homepage = "https://git.sr.ht/~mil/sxmo-utils";
