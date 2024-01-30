@@ -97,20 +97,20 @@ stdenv.mkDerivation rec {
 
     substituteInPlace $(${gnugrep}/bin/grep -rl '\. sxmo_common.sh') \
       --replace ". sxmo_common.sh" ". $out/bin/sxmo_common.sh"
-    substituteInPlace \
-      scripts/core/sxmo_winit.sh \
-      scripts/core/sxmo_xinit.sh \
-      scripts/core/sxmo_rtcwake.sh \
-      scripts/core/sxmo_migrate.sh \
-      --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
-    substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
-    substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
-    substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out"
-    substituteInPlace configs/udev/90-sxmo.rules --replace "/bin" "${busybox}/bin"
-    substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)'
+    #substituteInPlace \
+    #  scripts/core/sxmo_winit.sh \
+    #  scripts/core/sxmo_xinit.sh \
+    #  scripts/core/sxmo_rtcwake.sh \
+    3  scripts/core/sxmo_migrate.sh \
+    #  --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
+    #substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
+    #substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
+    #substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out"
+    #substituteInPlace configs/udev/90-sxmo.rules --replace "/bin" "${busybox}/bin"
+    #substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)'
 
-    substituteInPlace scripts/core/sxmo_common.sh --replace 'alias rfkill="busybox rfkill"' '#'
-    substituteInPlace configs/default_hooks/sxmo_hook_desktop_widget.sh --replace "wayout" "proycon-wayout"
+    #substituteInPlace scripts/core/sxmo_common.sh --replace 'alias rfkill="busybox rfkill"' '#'
+    #substituteInPlace configs/default_hooks/sxmo_hook_desktop_widget.sh --replace "wayout" "proycon-wayout"
   '';
 
   makeFlags = [
