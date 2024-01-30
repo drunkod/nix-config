@@ -101,7 +101,7 @@ stdenv.mkDerivation rec {
     #  scripts/core/sxmo_winit.sh \
     #  scripts/core/sxmo_xinit.sh \
     #  scripts/core/sxmo_rtcwake.sh \
-    3  scripts/core/sxmo_migrate.sh \
+    #  scripts/core/sxmo_migrate.sh \
     #  --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
     #substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
     #substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
