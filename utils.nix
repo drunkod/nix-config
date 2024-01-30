@@ -24,7 +24,7 @@
 , mako, dunst
 , wob
 , swayidle, xprintidle
-, codemadness-frontends, youtube-dl
+, ${codemadness-frontends}, youtube-dl
 }:
 
 let
