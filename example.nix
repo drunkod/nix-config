@@ -2,7 +2,7 @@
 
 let
   defaultUserName = "alex";
-  odemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
+  codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
 in
 
 {
