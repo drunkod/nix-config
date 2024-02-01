@@ -94,10 +94,29 @@
       # openssh.authorizedKeys.keys = [
       #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
       # ];
-      extraGroups = ["wheel"];
+      extraGroups = [ "networkmanager" "wheel"];
     };
   };
 
+  services.xserver.desktopManager.sxmo = {
+    enable = true;
+    user = alex;
+    group = "users";
+  };
+  fonts.fonts = with pkgs; [
+    noto-fonts
+    noto-fonts-emoji
+    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+  ];
+
+  fonts.fontconfig = {
+    defaultFonts = {
+      serif = [ "Noto Serif" ];
+      sansSerif = [ "Noto Sans" ];
+      monospace = [ "Fira Code Nerd Font" ];
+    };
+  };
+  
   # List packages installed in system profile. To search, run:
   # $ nix search wget
    environment.systemPackages = with pkgs; [
