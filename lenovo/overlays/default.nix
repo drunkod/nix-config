@@ -7,9 +7,19 @@
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
-     
-  sxmo-utils = prev.callPackage ../pkgs/sxmo { };
-  
+  codemadness-frontends = pkgs.callPackage ../pkgs/codemadness-frontends {};     
+  sxmo-utils = prev.callPackage ../pkgs/sxmo { 
+    inherit
+      codemadness-frontends
+      # mmsd-tng
+      # mnc
+      # superd
+      # vvmd
+      # sxmo-dwm
+      # sxmo-dmenu
+      # sxmo-st
+    ;
+  };
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });
