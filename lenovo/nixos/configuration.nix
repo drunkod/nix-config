@@ -6,6 +6,7 @@
   lib,
   config,
   pkgs,
+  defaultUserName ? "alex",
   ...
 }: {
   # You can import other NixOS modules here
@@ -87,10 +88,6 @@
 	# '';  
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
-  let 
-    defaultUserName = "alex";
-  in 
-  {
   users.users = {
     "${defaultUserName}" = {
       isNormalUser = true;
@@ -106,7 +103,6 @@
     user = defaultUserName;
     group = "users";
   };
-  }
 
   fonts.fonts = with pkgs; [
     noto-fonts
