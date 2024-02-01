@@ -2,7 +2,7 @@
   description = "NixOS + standalone home-manager config flakes to get you started!";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs = {nixpkgs, ...}: let
