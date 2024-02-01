@@ -4,7 +4,7 @@ with lib;
 
 let
   cfg = config.services.xserver.desktopManager.sxmo;
-  sxmopkgs = import ./default.nix { inherit pkgs; };
+  sxmopkgs = import ./mix.nix { inherit pkgs; };
   # codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
 in
 

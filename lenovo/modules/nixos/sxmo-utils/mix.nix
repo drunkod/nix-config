@@ -14,9 +14,9 @@ rec {
 #   proycon-wayout = pkgs.callPackage ./pkgs/proycon-wayout {};
 #   mnc         = pkgs.callPackage ./pkgs/mnc {};
 #   mmsd-tng    = pkgs.callPackage ./pkgs/mmsd-tng {};
-  codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
+  codemadness-frontends = pkgs.callPackage ../../../pkgs/codemadness-frontends {};
 #   vvmd        = pkgs.callPackage ./pkgs/vvmd {};
-  sxmo-utils  = pkgs.callPackage ./pkgs/sxmo-utils {
+  sxmo-utils  = pkgs.callPackage ../../../pkgs/sxmo {
     inherit
       codemadness-frontends
     #   mmsd-tng
