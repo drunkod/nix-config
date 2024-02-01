@@ -6,7 +6,7 @@
   lib,
   config,
   pkgs,
-  defaultUserName ? "alex",
+  # defaultUserName ? "alex",
   ...
 }: {
   # You can import other NixOS modules here
@@ -89,7 +89,7 @@
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
   users.users = {
-    "${defaultUserName}" = {
+    alex = {
       isNormalUser = true;
       # openssh.authorizedKeys.keys = [
       #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
@@ -100,7 +100,7 @@
 
   services.xserver.desktopManager.sxmo = {
     enable = true;
-    user = defaultUserName;
+    user = "alex";
     group = "users";
   };
 
