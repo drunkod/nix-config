@@ -7,6 +7,9 @@
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
+     
+  sxmo-utils = prev.callPackage ../pkgs/sxmo { };
+  
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });
