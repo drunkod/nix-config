@@ -13,6 +13,7 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
     # outputs.nixosModules.example
+    outputs.packages
     outputs.nixosModules.sxmo-utils
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
