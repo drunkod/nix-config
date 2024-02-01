@@ -3,5 +3,5 @@
 pkgs: {
   # example = pkgs.callPackage ./example { };
   codemadness-frontends = pkgs.callPackage ./codemadness-frontends { };
-  sxmo-utils = pkgs.callPackage ./sxmo { };
+  sxmo = pkgs.callPackage ./sxmo { };
 }
