@@ -4,9 +4,14 @@ with lib;
 
 let
   cfg = config.services.xserver.desktopManager.sxmo;
+  # codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
 in
 
 {
+  # environment.systemPackages = [
+  #   codemadness-frontends
+  # ];
+
   options.services.xserver.desktopManager.sxmo = {
     enable = mkEnableOption "Simple X Mobile";
 
