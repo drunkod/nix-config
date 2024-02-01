@@ -36,7 +36,9 @@
 
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
-
+      # final: prev: {
+      #   sxmo-utils = prev.callPackage ./utils.nix { };
+      # }
       # Or define it inline, for example:
       # (final: prev: {
       #   hi = final.hello.overrideAttrs (oldAttrs: {
