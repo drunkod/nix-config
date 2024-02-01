@@ -87,9 +87,12 @@
 	# '';  
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
-
+  let 
+    defaultUserName = "alex";
+  in 
+  {
   users.users = {
-    alex = {
+    "${defaultUserName}" = {
       isNormalUser = true;
       # openssh.authorizedKeys.keys = [
       #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
@@ -100,9 +103,11 @@
 
   services.xserver.desktopManager.sxmo = {
     enable = true;
-    user = alex;
+    user = defaultUserName;
     group = "users";
   };
+  }
+
   fonts.fonts = with pkgs; [
     noto-fonts
     noto-fonts-emoji
@@ -116,7 +121,7 @@
       monospace = [ "Fira Code Nerd Font" ];
     };
   };
-  
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
    environment.systemPackages = with pkgs; [
