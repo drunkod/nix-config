@@ -4,9 +4,15 @@ with lib;
 
 let
   cfg = config.services.xserver.desktopManager.sxmo;
+  sxmopkgs = import ./mix.nix { inherit pkgs; };
+  # codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
 in
 
 {
+  # environment.systemPackages = [
+  #   codemadness-frontends
+  # ];
+
   options.services.xserver.desktopManager.sxmo = {
     enable = mkEnableOption "Simple X Mobile";
 
@@ -31,10 +37,10 @@ in
 
     systemd.defaultUnit = "graphical.target";
 
-    services.udev.packages = [ pkgs.sxmo-utils ];
+    services.udev.packages = [ sxmopkgs.sxmo-utils ];
     users.users.${cfg.user}.extraGroups = [ "input" "video" ];
     security.doas.enable = lib.mkDefault true;
-    security.doas.extraConfig = builtins.readFile "${pkgs.sxmo-utils}/etc/doas.d/sxmo.conf";
+    security.doas.extraConfig = builtins.readFile "${sxmopkgs.sxmo-utils}/etc/doas.d/sxmo.conf";
 
     # Megapixels requires this, and bemenu is much more fluent with this
     hardware.opengl.enable = lib.mkDefault true;
@@ -42,8 +48,8 @@ in
     systemd.services.sxmo = {
       wantedBy = [ "graphical.target" ];
       serviceConfig = {
-        ExecStartPre = "+${pkgs.sxmo-utils}/bin/sxmo_setpermissions.sh";
-        ExecStart = "${pkgs.sxmo-utils}/bin/sxmo_winit.sh";
+        ExecStartPre = "+${sxmopkgs.sxmo-utils}/bin/sxmo_setpermissions.sh";
+        ExecStart = "${sxmopkgs.sxmo-utils}/bin/sxmo_winit.sh";
         User = cfg.user;
         Group = cfg.group;
         PAMName = "login";

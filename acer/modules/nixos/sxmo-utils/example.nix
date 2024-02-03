@@ -1,10 +1,13 @@
 { config, pkgs, ... }:
 
 let
-  defaultUserName = "alice";
+  defaultUserName = "alex";
+  
 in
 
 {
+
+
   imports = [ ./module.nix ];
   nixpkgs.overlays = [ (import ./overlay.nix) ];
 
