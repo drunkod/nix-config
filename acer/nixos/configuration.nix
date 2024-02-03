@@ -24,7 +24,8 @@
       
       ./boot.nix
       ./greetd.nix
-      <home-manager/nixos>
+
+    inputs.home-manager.nixosModules.home-manager
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
