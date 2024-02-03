@@ -101,6 +101,7 @@ nix flake init -t github:misterio77/nix-starter-config#standard --refresh
         - install template `nix flake init -t github:drunkod/nixpkgs-sxmo#hostname`
         - install flake `nixos-install --flake .#hostname` instead, and reboot.
         - change password after login `passwd {username}`.
+        - # comment sway after install manual home manager
 - Run `home-manager switch --flake .#username@hostname` to apply your home
   configuration.
   - If you don't have home-manager installed, try `nix shell nixpkgs#home-manager`.

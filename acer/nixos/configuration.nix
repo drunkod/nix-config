@@ -98,8 +98,8 @@
   security.polkit.enable = true;
   hardware.opengl.enable = true; # when using QEMU KVM
 
-  programs.sway.enable = true;
-  # comment after inastall manual home manager
+  # programs.sway.enable = true;
+  # comment after install manual home manager
 
   # Set your time zone.
   time.timeZone = "Asia/Yekaterinburg";
