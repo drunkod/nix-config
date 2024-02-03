@@ -10,7 +10,7 @@
     # Use sway desktop environment with Wayland display server
     wayland.windowManager.sway = {
       enable = true;
-      # wrapperFeatures.gtk = true;
+      wrapperFeatures.gtk = true;
       # Sway-specific Configuration
       config = {
         terminal = "alacritty";

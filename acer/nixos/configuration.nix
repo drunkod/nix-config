@@ -25,6 +25,7 @@
       ./boot.nix
       ./greetd.nix
       ./xdg_for_sway.nix
+      ./opengl.nix
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
     
@@ -97,7 +98,6 @@
   };
 
   security.polkit.enable = true;
-  hardware.opengl.enable = true; # when using QEMU KVM
 
   # programs.sway.enable = true;
   # comment after install manual home manager
