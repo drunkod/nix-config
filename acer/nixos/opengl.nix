@@ -1,3 +1,9 @@
+  {
+  pkgs,
+  ...
+}:
+
+{
   # Hardware Support for Wayland Sway
   hardware = {
     opengl = {
@@ -5,3 +11,4 @@
       driSupport = true;
     };
   };
+  }
