@@ -24,7 +24,7 @@
       
       ./boot.nix
       ./greetd.nix
-      
+
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
   ];
@@ -96,12 +96,6 @@
 
   security.polkit.enable = true;
   hardware.opengl.enable = true; # when using QEMU KVM
-
-  services.xserver.desktopManager.sxmo = {
-    enable = true;
-    user = "alex";
-    group = "users";
-  };
 
 
   # List packages installed in system profile. To search, run:
