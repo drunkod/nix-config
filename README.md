@@ -94,8 +94,13 @@ nix flake init -t github:misterio77/nix-starter-config#standard --refresh
 
 - Run `sudo nixos-rebuild switch --flake .#hostname` to apply your system
   configuration.
-    - If you're still on a live installation medium, run `nixos-install --flake
-      .#hostname` instead, and reboot.
+    - If you're still on a live iso installation medium:
+        - [Install manualy](https://nixos.org/manual/nixos/stable/#sec-installation-manual)
+        - ...
+        - `mount /dev/disk/by-label/nixos /mnt`
+        - install template `nix flake init -t github:drunkod/nixpkgs-sxmo#hostname`
+        - install flake `nixos-install --flake .#hostname` instead, and reboot.
+        - change password after login `passwd {username}`.
 - Run `home-manager switch --flake .#username@hostname` to apply your home
   configuration.
   - If you don't have home-manager installed, try `nix shell nixpkgs#home-manager`.

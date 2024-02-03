@@ -90,6 +90,7 @@
       # openssh.authorizedKeys.keys = [
       #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
       # ];
+      initialPassword = "127127";
       extraGroups = [ "networkmanager" "wheel"];
     };
   };
