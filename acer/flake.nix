@@ -70,6 +70,10 @@
 
     # Standalone home-manager configuration entrypoint
     # Available through 'home-manager --flake .#your-username@your-hostname'
+    # install 
+    # sudo nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+    # sudo nix-channel --update
+    
     homeConfigurations = {
       "alex@acer" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
