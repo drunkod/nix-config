@@ -25,8 +25,6 @@
       ./boot.nix
       ./greetd.nix
 
-    inputs.home-manager.nixosModules.home-manager
-
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
   ];
@@ -99,6 +97,8 @@
   security.polkit.enable = true;
   hardware.opengl.enable = true; # when using QEMU KVM
 
+  programs.sway.enable = true;
+  # comment after inastall manual home manager
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
