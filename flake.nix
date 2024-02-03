@@ -40,7 +40,7 @@
       acer = {
         description = ''
           acer flake - augmented with boilerplate for custom packages, overlays, and reusable modules.
-          Perfect migration path for when you want to dive a little deeper.
+          
         '';
         path = ./acer;
       };
