@@ -72,7 +72,7 @@ export NIX_CONFIG="experimental-features = nix-command flakes"
 nix flake init -t github:misterio77/nix-starter-config#minimal --refresh
 
 # For standard version
-nix flake init -t github:misterio77/nix-starter-config#standard --refresh
+nix flake init -t github:drunkod/nixpkgs-sxmo#standard --refresh
 ```
 - If you want to use NixOS: add stuff you currently have on `/etc/nixos/` to
   `nixos` (usually `configuration.nix` and `hardware-configuration.nix`, when
