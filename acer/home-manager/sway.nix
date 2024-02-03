@@ -26,8 +26,8 @@
         output = {
           LVDS-1 = {
             # Set HIDP scale (pixel integer scaling)
-            # scale = "1";
-            mode = "1366x768@60.014Hz";
+            scale = "1";
+            # mode = "1366x768@60.014Hz";
 	      };
 	    };
       };

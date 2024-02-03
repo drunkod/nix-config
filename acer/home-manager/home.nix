@@ -20,6 +20,7 @@
     # ./nvim.nix
     ./sway.nix
     ./staff.nix
+    ./terminal.nix
   ];
 
   nixpkgs = {

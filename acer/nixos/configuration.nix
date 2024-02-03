@@ -24,7 +24,7 @@
       
       ./boot.nix
       ./greetd.nix
-
+      ./xdg_for_sway.nix
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
     
