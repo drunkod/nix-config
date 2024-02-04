@@ -123,6 +123,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
    environment.systemPackages = with pkgs; [
+     (nerdfonts.override { fonts = [ "JetBrainsMono" "NerdFontsSymbolsOnly" "Iosevka" ]; })
     git  
     firefox
     google-chrome

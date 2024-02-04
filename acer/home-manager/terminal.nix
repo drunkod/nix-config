@@ -9,43 +9,65 @@
 {
     # Rust-based terminal emulator
     programs.alacritty = {
-      enable = true;
-      settings = {
-        env.TERM = "alacritty";
-        window = {
-          decorations = "full";
-          title = "Alacritty";
-          dynamic_title = true;
-          class = {
-            instance = "Alacritty";
-            general = "Alacritty";
-          };
+    enable = true;
+    settings = {
+
+      draw_bold_text_with_bright_colors = true;
+
+      window = {
+        decorations = "full";
+        decorations_theme_variant = "Dark";
+        opacity = 0.8;
+      };
+
+      font = {
+        size = 12;
+        normal.family = "JetBrainsMono NF";
+        bold = {
+          family = "JetBrainsMono NF";
+          style = "Bold";
         };
-        font = {
-          normal = {
-            family = "monospace";
-            style = "regular";
-          };
-          bold = {
-            family = "monospace";
-            style = "regular";
-          };
-          italic = {
-            family = "monospace";
-            style = "regular";
-          };
-          bold_italic = {
-            family = "monospace";
-            style = "regular";
-          };
-          size = 14.00;
+        italic = {
+          family = "JetBrainsMono NF";
+          style = "Italic";
         };
-        colors = {
-          primary = {
-            background = "#1d1f21";
-            foreground = "#c5c8c6";
-          };
+        bold_italic = {
+          family = "JetBrainsMono NF";
+          style = "Bold Italic";
+        };
+      };
+
+      #shell.program = "${pkgs.zsh}/bin/zsh";
+
+      cursor.style = "Beam";
+
+      colors = {
+        primary = {
+          background = "0x000b1e";
+          foreground = "0x0abdc6";
+        };
+        normal = {
+          black = "0x123e7c";
+          red = "0xff0000";
+          green = "0xd300c4";
+          yellow = "0xf57800";
+          blue = "0x123e7c";
+          magenta = "0x711c91";
+          cyan = "0x0abdc6";
+          white = "0xd7d7d5";
+        };
+        dim = {
+          black = "0x1c61c2";
+          red = "0xff0000";
+          green = "0xd300c4";
+          yellow = "0xf57800";
+          blue = "0x123e7c";
+          magenta = "0x711c91";
+          cyan = "0x0abdc6";
+          white = "0xd7d7d5";
         };
       };
     };
+};
+
 }

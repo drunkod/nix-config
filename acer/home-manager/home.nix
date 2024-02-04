@@ -21,6 +21,7 @@
     ./sway.nix
     ./staff.nix
     ./terminal.nix
+    ./env.nix
   ];
 
   nixpkgs = {
