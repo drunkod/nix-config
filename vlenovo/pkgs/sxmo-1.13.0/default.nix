@@ -15,7 +15,7 @@
 , file
 , mmsd-tng
 , isX ? false
-, sway, sway-unwrapped, dwm
+, sway, dwm
 , bemenu, dmenu
 , foot, st
 , wvkbd, svkbd
@@ -24,23 +24,9 @@
 , mako, dunst
 , wob
 , swayidle, xprintidle
-, codemadness-frontends 
+, codemadness-frontends
 #, youtube-dl
 }:
-
-let
-  sxmo-sway = sway.override {
-    withBaseWrapper = true;
-    withGtkWrapper = true;
-    sway-unwrapped = sway-unwrapped.overrideAttrs (super: {
-      # https://github.com/swaywm/sway/pull/6455
-      patches = (super.patches or [ ]) ++ lib.singleton (fetchpatch {
-        url = "https://github.com/swaywm/sway/commit/4666d1785bfb6635e6e8604de383c91714bceebc.patch";
-        hash = "sha256-e2++kHvEksPJLVxnOtgidLTMVXQQw8WFXiKTNkVGVW4=";
-      });
-    });
-  };
-in
 
 stdenv.mkDerivation rec {
   pname = "sxmo-utils";
@@ -78,7 +64,10 @@ stdenv.mkDerivation rec {
       codemadness-frontends # reddit-cli and youtube-cli for sxmo_[reddit|youtube].sh
       #youtube-dl
     ] ++ lib.optionals (!isX) [
-      sxmo-sway
+      (sway.override {
+        withBaseWrapper = true;
+        withGtkWrapper = true;
+      })
       bemenu
       foot
       wvkbd
