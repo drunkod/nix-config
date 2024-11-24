@@ -80,9 +80,10 @@
   # boot.loader.efi.canTouchEfiVariables = false;
   # boot.loader.grub.efiSupport = true;
   # boot.loader.grub.efiInstallAsRemovable = true;
-  boot.loader.grub.device = "nodev";
+  boot.loader.grub.device = "/dev/vda";
   # boot.loader.grub.forcei686 = true;
-
+  #boot.loader.grub.device = "/dev/sda";   # (for BIOS systems only)
+  #boot.loader.systemd-boot.enable = true; # (for UEFI systems only)
   networking.hostName = "vlenovo"; # Define your hostname.
   # Pick only one of the below networking options.
   #  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
