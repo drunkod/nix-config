@@ -16,7 +16,7 @@
   boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = true;
   boot.supportedFilesystems = [ "ntfs" ];
-  networking.hostName = "acer"; # Define your hostname.
+  networking.hostName = "hp"; # Define your hostname.
 #  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -103,7 +103,7 @@
  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.alex = {
     isNormalUser = true;
-    description = "Alex-acer";
+    description = "Alex-hp";
     extraGroups = [ "networkmanager" "wheel" "docker" "libvirtd" ];
     packages = with pkgs; [
 #      firefox
