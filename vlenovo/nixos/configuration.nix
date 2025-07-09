@@ -95,20 +95,43 @@
   users.users = {
     alex = {
       isNormalUser = true;
-      # openssh.authorizedKeys.keys = [
-      #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
-      # ];
+
       extraGroups = [ "networkmanager" "wheel"];
-      password = "";
+      password = "test";
+
+    # Optional: Add your SSH public key for key-based auth
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDV45EkSp+b5fraVf5vDDUbuu2O7kVGxDn+8O6y/xcxh alex@gmail.com"
+      ];      
     };
   };
   # Allow passwordless sudo for wheel group
-  security.sudo.wheelNeedsPassword = false;    
+  security.sudo.wheelNeedsPassword = false;
+
+  # Add VM port forwarding for SSH access
+  virtualisation.vmVariant.virtualisation.forwardPorts = [
+    { from = "host"; host.port = 2222; guest.port = 22; }
+  ];      
 
   services.xserver.desktopManager.sxmo = {
     enable = true;
     user = "alex";
     group = "users";
+  };
+
+  # 1. Disable the standard text-login prompt on TTY1.
+  systemd.services."getty@tty1".enable = false;
+
+  systemd.services.sxmo = {
+    # It's good practice to declare that sxmo conflicts with the getty service.
+    conflicts = [ "getty@tty1.service" ];
+
+    # Override specific settings within the serviceConfig.
+    # lib.mkForce gives our values the highest priority.
+    serviceConfig = {
+      TTYPath = lib.mkForce "/dev/tty1";
+      UtmpIdentifier = lib.mkForce "tty1";
+    };
   };
 
   fonts.packages = with pkgs; [
@@ -150,7 +173,11 @@
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  networking.firewall.enable = false;
+    # Open SSH port in firewall
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 22 ];
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
@@ -159,15 +186,15 @@
 
   # This setups a SSH server. Very important if you're setting up a headless system.
   # Feel free to remove if you don't need it.
-  # services.openssh = {
-  #   enable = true;
-  #   settings = {
-  #     # Forbid root login through SSH.
-  #     PermitRootLogin = "no";
-  #     # Use keys only. Remove if you want to SSH using password (not recommended)
-  #     PasswordAuthentication = false;
-  #   };
-  # };
+  services.openssh = {
+    enable = true;
+    settings = {
+      # Forbid root login through SSH.
+      PermitRootLogin = "no";
+      # Use keys only. Remove if you want to SSH using password (not recommended)
+      PasswordAuthentication = true;
+    };
+  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.05";
