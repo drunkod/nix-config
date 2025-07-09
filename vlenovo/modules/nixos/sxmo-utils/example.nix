@@ -27,11 +27,11 @@ in
   networking.wireless.enable = false;
   networking.networkmanager.enable = true;
 
-  fonts.fonts = with pkgs; [
-    noto-fonts
-    noto-fonts-emoji
-    (nerdfonts.override { fonts = [ "FiraCode" ]; })
-  ];
+  fonts.packages = with pkgs; [
+      noto-fonts
+      noto-fonts-emoji
+      nerd-fonts.fira-code
+    ];
 
   fonts.fontconfig = {
     defaultFonts = {

@@ -99,8 +99,11 @@
       #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
       # ];
       extraGroups = [ "networkmanager" "wheel"];
+      password = "";
     };
   };
+  # Allow passwordless sudo for wheel group
+  security.sudo.wheelNeedsPassword = false;    
 
   services.xserver.desktopManager.sxmo = {
     enable = true;
@@ -108,10 +111,11 @@
     group = "users";
   };
 
-  fonts.fonts = with pkgs; [
+  fonts.packages = with pkgs; [
     noto-fonts
     noto-fonts-emoji
-    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    # This is the new way to specify the FiraCode Nerd Font
+    nerd-fonts.fira-code
   ];
 
   fonts.fontconfig = {
