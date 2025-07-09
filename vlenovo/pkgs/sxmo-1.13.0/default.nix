@@ -39,7 +39,7 @@ stdenv.mkDerivation rec {
     hash = "sha256-HNkajPC/spozxRlaP0iMWvOAfriRjl2wo1wdcbVCrkU=";
   };
 
-  patches = [ ./nerdfonts-3.0.0.patch ];
+  patches = [ ./nerdfonts-3.0.0.patch ./remove-reddit-support.patch];
 
   postPatch = ''
     substituteInPlace Makefile --replace '"$(PREFIX)/bin/{}"' '"$(out)/bin/{}"'
