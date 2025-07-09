@@ -39,12 +39,16 @@ stdenv.mkDerivation rec {
     hash = "sha256-HNkajPC/spozxRlaP0iMWvOAfriRjl2wo1wdcbVCrkU=";
   };
 
-  patches = [ ./nerdfonts-3.0.0.patch ./remove-reddit-support.patch];
+  patches = [ ./nerdfonts-3.0.0.patch ];
 
   postPatch = ''
     substituteInPlace Makefile --replace '"$(PREFIX)/bin/{}"' '"$(out)/bin/{}"'
     substituteInPlace Makefile --replace '$(DESTDIR)/usr' '$(out)'
     substituteInPlace setup_config_version.sh --replace "busybox" ""
+
+    rm scripts/appscripts/sxmo_reddit.sh
+
+    sed -i '/_battery() {/a \	[ ! -d /sys/class/power_supply ] || [ -z "$(ls -A /sys/class/power_supply)" ] && return' configs/default_hooks/sxmo_hook_statusbar.sh
 
     # A better way than wrapping hundreds of shell scripts (some of which are even meant to be sourced)
     sed -i '2i export PATH="'"$out"'/bin:${lib.makeBinPath ([

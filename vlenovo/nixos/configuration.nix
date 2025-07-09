@@ -75,15 +75,12 @@
 
 
   # Bootloader
-  boot.loader.grub.enable = true;
-
-  # Bootloader
   boot.loader.efi.canTouchEfiVariables = false;
   boot.loader.grub.efiSupport = true;
   boot.loader.grub.efiInstallAsRemovable = true;
   boot.loader.grub.device = "nodev";
   boot.loader.grub.forcei686 = true;
-
+  
   #boot.loader.grub.device = "/dev/sda";   # (for BIOS systems only)
   #boot.loader.systemd-boot.enable = true; # (for UEFI systems only)
   networking.hostName = "vlenovo"; # Define your hostname.
@@ -106,7 +103,15 @@
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDV45EkSp+b5fraVf5vDDUbuu2O7kVGxDn+8O6y/xcxh alex@gmail.com"
       ];      
     };
+    root ={
+          # Optional: Add your SSH public key for key-based auth
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDV45EkSp+b5fraVf5vDDUbuu2O7kVGxDn+8O6y/xcxh alex@gmail.com"
+      ]; 
+    };
   };
+
+  
   # Allow passwordless sudo for wheel group
   security.sudo.wheelNeedsPassword = false;
 
@@ -192,9 +197,9 @@
     enable = true;
     settings = {
       # Forbid root login through SSH.
-      PermitRootLogin = "no";
+      PermitRootLogin = "prohibit-password";
       # Use keys only. Remove if you want to SSH using password (not recommended)
-      PasswordAuthentication = true;
+      PasswordAuthentication = false;
     };
   };
 
