@@ -48,7 +48,7 @@ in
     systemd.services.sxmo = {
       wantedBy = [ "graphical.target" ];
       serviceConfig = {
-        ExecStartPre = "+${sxmopkgs.sxmo-utils}/bin/sxmo_setpermissions.sh";
+        # ExecStartPre = "+${sxmopkgs.sxmo-utils}/bin/sxmo_setpermissions.sh";
         ExecStart = "${sxmopkgs.sxmo-utils}/bin/sxmo_winit.sh";
         User = cfg.user;
         Group = cfg.group;
