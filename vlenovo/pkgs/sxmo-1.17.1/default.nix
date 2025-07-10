@@ -25,28 +25,35 @@
 , wob
 , swayidle, xprintidle
 , codemadness-frontends
+, scdoc # Added scdoc
+, pkg-config # Added pkg-config
+, libcap # Added libcap
+, icu # Added icu
 #, youtube-dl
 }:
 
 stdenv.mkDerivation rec {
   pname = "sxmo-utils";
-  version = "1.13.0";
+  nativeBuildInputs = [ scdoc pkg-config libcap ]; # Added scdoc pkg-config libcap
+  buildInputs = [ icu ]; # Added icu
+  version = "1.17.1";
 
   src = fetchFromSourcehut {
     owner = "~mil";
     repo = pname;
     rev = version;
-    hash = "sha256-HNkajPC/spozxRlaP0iMWvOAfriRjl2wo1wdcbVCrkU=";
+    hash = "sha256-RU57qxfIlci0VuN+lAME1hrBt1aRIIxUzWOxkePYxlQ=";
   };
 
-  patches = [ ./nerdfonts-3.0.0.patch ];
+  # patches = [ ./nerdfonts-3.0.0.patch ]; # Assuming the patch is no longer needed or needs update
+  patches = [];
 
   postPatch = ''
     substituteInPlace Makefile --replace '"$(PREFIX)/bin/{}"' '"$(out)/bin/{}"'
-    substituteInPlace Makefile --replace '$(DESTDIR)/usr' '$(out)'
+    # Removed: substituteInPlace Makefile --replace '$(DESTDIR)/usr' '$(out)'
     substituteInPlace setup_config_version.sh --replace "busybox" ""
 
-    rm scripts/appscripts/sxmo_reddit.sh
+    # Removed: rm scripts/appscripts/sxmo_reddit.sh (file does not exist in 1.17.1)
 
     sed -i '/_battery() {/a \	[ ! -d /sys/class/power_supply ] || [ -z "$(ls -A /sys/class/power_supply)" ] && return' configs/default_hooks/sxmo_hook_statusbar.sh
 
@@ -95,19 +102,18 @@ stdenv.mkDerivation rec {
     substituteInPlace $(${gnugrep}/bin/grep -rl '\. sxmo_common.sh') \
       --replace ". sxmo_common.sh" ". $out/bin/sxmo_common.sh"
     substituteInPlace \
-      scripts/core/sxmo_winit.sh \
-      scripts/core/sxmo_xinit.sh \
-      scripts/core/sxmo_rtcwake.sh \
+      scripts/core/sxmo_init.sh \
       scripts/core/sxmo_migrate.sh \
       --replace "/etc/profile.d/sxmo_init.sh" "$out/etc/profile.d/sxmo_init.sh"
     substituteInPlace scripts/core/sxmo_version.sh --replace "/usr/bin/" ""
-    substituteInPlace configs/superd/services/* --replace "/usr/bin/" ""
-    substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out"
+    substituteInPlace configs/services/* configs/external-services/* --replace "/usr/bin/" ""
+    # Removed: substituteInPlace configs/appcfg/sway_template --replace "/usr" "$out" (pattern not found)
     substituteInPlace configs/udev/90-sxmo.rules --replace "/bin" "${busybox}/bin"
-    substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)'
+    # Removed: substituteInPlace scripts/core/sxmo_uniq_exec.sh --replace '$1' '$(command -v $1)' (file not found)
 
     substituteInPlace scripts/core/sxmo_common.sh --replace 'alias rfkill="busybox rfkill"' '#'
     substituteInPlace configs/default_hooks/sxmo_hook_desktop_widget.sh --replace "wayout" "proycon-wayout"
+    substituteInPlace Makefile --replace "setcap 'cap_wake_alarm=ep'" "# setcap 'cap_wake_alarm=ep'" # Comment out setcap
   '';
 
   makeFlags = [

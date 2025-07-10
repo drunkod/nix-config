@@ -8,9 +8,8 @@
   # https://nixos.wiki/wiki/Overlays
   modifications = final: prev: {
   # codemadness-frontends = prev.callPackage ../pkgs/codemadness-frontends {};     
-  # sxmo-utils = prev.callPackage ../pkgs/sxmo { 
-  #   inherit
-  #     codemadness-frontends
+  sxmo-utils = prev.callPackage ../pkgs/sxmo-1.17.1 {
+    codemadness-frontends = prev.codemadness-frontends;
   #     # mmsd-tng
   #     # mnc
   #     # superd
@@ -18,8 +17,8 @@
   #     # sxmo-dwm
   #     # sxmo-dmenu
   #     # sxmo-st
-  #   ;
-  # };
+  #   ; # Ensure this semicolon is also removed if it was part of the original uncommenting logic
+  };
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });

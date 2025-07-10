@@ -16,7 +16,7 @@ rec {
 #   mmsd-tng    = pkgs.callPackage ./pkgs/mmsd-tng {};
   codemadness-frontends = pkgs.callPackage ../../../pkgs/codemadness-frontends {};
 #   vvmd        = pkgs.callPackage ./pkgs/vvmd {};
-  sxmo-utils  = pkgs.callPackage ../../../pkgs/sxmo-1.13.0 {
+  sxmo-utils  = pkgs.callPackage ../../../pkgs/sxmo-1.17.1 {
     inherit
       codemadness-frontends
     #   mmsd-tng

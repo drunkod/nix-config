@@ -57,7 +57,7 @@ index f3be346..e1cbc5e
 -icon_edt="" #editor
 -icon_eml="" #email
 -icon_ena="" # enabled
--icon_exp="" #expand
+-icon_exp=" Indore" #expand
 +icon_edt="󰎞" #editor
 +icon_eml="󰇮" #email
 +icon_ena="󰄣" # enabled
