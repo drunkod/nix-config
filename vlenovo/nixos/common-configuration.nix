@@ -88,5 +88,5 @@
   networking.firewall.allowedTCPPorts = [ 22 ];
 
   # State version
-  system.stateVersion = "25.11";
+  system.stateVersion = "25.05";
 }

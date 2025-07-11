@@ -1,0 +1,54 @@
+name: NixOS VM Tests
+
+on:
+  push:
+    branches: [ main ] # Adjust as needed
+  pull_request:
+    branches: [ main ] # Adjust as needed
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  test-vlenovo-flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attempt to enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP=="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger
+          sudo modprobe kvm_intel || sudo modprobe kvm_amd || echo "KVM module (Intel or AMD) not loaded, VM tests might fail."
+          ls -al /dev/kvm || echo "/dev/kvm not found, KVM might not be available."
+          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+          echo "Current user: $(whoami)"
+          echo "Groups: $(groups)"
+          echo "Checking KVM capability..."
+          sudo apt-get update && sudo apt-get install -y cpu-checker
+          kvm-ok || echo "kvm-ok check failed. Continuing, but VM tests might not run optimally or at all."
+
+
+      - name: Run vlenovo Flake Checks
+        run: |
+          cd vlenovo
+          nix flake check -L --option eval-cache false
+        env:
+          # Attempt to force software rendering if hardware acceleration is problematic in CI
+          # This is a guess and might not be needed or might need different variables.
+          LIBGL_ALWAYS_SOFTWARE: "true"
+          GALLIUM_DRIVER: "llvmpipe"
+          NIXPKGS_ALLOW_UNFREE: "1" # If any packages in the tests are unfree
+
+      - name: Show dmesg on failure (optional debugging)
+        if: failure()
+        run: |
+          echo "Dumping dmesg due to test failure:"
+          sudo dmesg | tail -n 200
