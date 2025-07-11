@@ -14,7 +14,7 @@ The core of this setup is **[Sxmo (Simple X Mobile)](https://sxmo.org/)**, a min
 *   **Declarative:** The entire system state is defined in `.nix` files. No more manual configuration drift.
 *   **Reproducible:** You can rebuild the exact same system on any compatible machine.
 *   **Powered by Flakes:** Uses the modern Nix Flakes feature for clean dependency management and project structure.
-*   **Mobile-First UI:** Leverenges a custom-built `sxmo-utils` package to provide a touch-and-gesture-based interface.
+*   **Mobile-First UI:** Leverages a custom-built `sxmo-utils` package to provide a touch-and-gesture-based interface.
 *   **User Management:** System configuration (`nixos`) and user environment (`home-manager`) are managed separately but work together seamlessly.
 
 ## 2. Project Structure
