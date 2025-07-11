@@ -42,7 +42,11 @@
   in {
     # Your custom packages
     # Accessible through 'nix build', 'nix shell', etc
-    packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
+    packages = forAllSystems (system:
+      import ./pkgs {
+        pkgs = nixpkgs.legacyPackages.${system};
+        pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.${system};
+      });
     # Formatter for your nix files, available through 'nix fmt'
     # Other options beside 'alejandra' include 'nixpkgs-fmt'
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
@@ -80,5 +84,91 @@
         ];
       };
     };
+
+        checks = forAllSystems (system:
+      let
+        # 1. Create a `pkgs` instance specifically for the tests.
+        #    This makes the test self-contained.
+        pkgs = import nixpkgs {
+          inherit system;
+          # 2. Apply the SAME overlays here that your main configuration uses.
+          #    This ensures that `pkgs.sxmo-utils` inside the test resolves
+          #    to your custom wrapped version.
+          overlays = [
+            outputs.overlays.additions
+            outputs.overlays.modifications
+            outputs.overlays.unstable-packages
+          ];
+        };
+      in
+      {
+        # --- YOUR EXISTING, WORKING SERVICE TEST ---
+        sxmo-vm-test = pkgs.nixosTest {
+          name = "sxmo-vm-test";
+          nodes.machine = {
+            imports = [
+              ./nixos/common-configuration.nix
+              outputs.nixosModules.sxmo-utils
+            ];
+            # Overlays are now applied to the top-level `pkgs` for the test.
+          };
+          testScript = ''
+                  machine.start()
+                  machine.wait_for_unit("multi-user.target")
+                  machine.wait_for_unit("sxmo.service")
+
+                  # Give it a moment to settle.
+                  machine.sleep(5)
+
+                  # Final state check: it must be active.
+                  machine.succeed("systemctl is-active --quiet sxmo.service")
+
+                  # Log check: it must not have failed during startup.
+                  machine.succeed("! journalctl -u sxmo.service | grep 'Failed with result'")
+          '';
+        };
+
+        # --- THE NEW, CORRECTED UI TEST ---
+        sxmo-ui-test = pkgs.nixosTest {
+          name = "sxmo-ui-test";
+
+          nodes.machine = {
+            # 3. The node configuration is now much simpler.
+            #    It inherits the correctly configured `pkgs` from the `let` block above.
+            imports = [
+              ./nixos/common-configuration.nix
+              outputs.nixosModules.sxmo-utils
+            ];
+
+            # Enable graphics in the VM for screenshots.
+            virtualisation.graphics = true;
+
+            # Add the screenshot tool.
+            # It correctly comes from the overridden `pkgs`.
+            environment.systemPackages = [ pkgs.grim ];
+          };
+
+                    testScript = ''
+            import os
+
+            machine.start()
+            machine.wait_for_unit("graphical.target")
+            machine.wait_for_unit("sxmo.service")
+
+            # Give the UI plenty of time to draw everything
+            machine.sleep(10)
+
+            # sxmo_wm.sh execwait will find the user's graphical session and run the
+            # command within it, inheriting all the necessary environment variables.
+            machine.succeed("sxmo_wm.sh execwait grim /tmp/screenshot.png")
+
+            # Copy the screenshot from the VM to the host for analysis
+            machine.copy_from_vm("/tmp/screenshot.png")
+
+            # Assert that the screenshot file is not empty or tiny
+            assert os.path.getsize("screenshot.png") > 5000, "Screenshot file is too small, UI likely didn't render."
+          '';
+        };
+      });
   };
 }
