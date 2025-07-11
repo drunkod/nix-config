@@ -30,7 +30,7 @@ Understanding the file layout is key to managing your system.
 *   `modules/`: Reusable configurations (NixOS modules) that can be shared or upstreamed.
     *   `nixos/sxmo-utils/`: A custom module you've created to cleanly integrate Sxmo into NixOS. It defines the `systemd` service and related system settings.
 *   `pkgs/`: Custom Nix package definitions (derivations).
-    *   `sxmo-1.13.0/`: The Nix expression to build your specific version of `sxmo-utils`, complete with patches and dependencies.
+    *   `sxmo-1.17.1/`: The Nix expression to build your specific version of `sxmo-utils`, complete with patches and dependencies.
     *   `codemadness-frontends/`: A dependency for `sxmo-utils`, packaged for Nix.
 *   `overlays/`: A mechanism to add your custom packages (`pkgs/`) or modify existing ones from `nixpkgs`.
 
