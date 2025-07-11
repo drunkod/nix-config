@@ -169,6 +169,60 @@
             assert os.path.getsize("screenshot.png") > 5000, "Screenshot file is too small, UI likely didn't render."
           '';
         };
+
+        # --- NEW VM TEST: Check sxmo_appmenu.sh ---
+        sxmo-appmenu-test = pkgs.nixosTest {
+          name = "sxmo-appmenu-test";
+          nodes.machine = {
+            imports = [
+              ./nixos/common-configuration.nix
+              outputs.nixosModules.sxmo-utils
+            ];
+            virtualisation.graphics = true; # Sxmo services might need this
+          };
+          testScript = ''
+            machine.start()
+            machine.wait_for_unit("multi-user.target")
+            machine.wait_for_unit("sxmo.service")
+
+            # Give services a moment to settle after sxmo.service is active
+            machine.sleep(5)
+
+            # Check if sxmo_appmenu.sh can be executed successfully by the user
+            # sxmo_appmenu.sh might try to interact with dmenu/bemenu,
+            # but we are primarily testing if the script can be found and started.
+            # A successful exit (0) is a good sign.
+            # It might print to stderr if no menu utility is found in PATH or if display is not available,
+            # so we don't check stderr, only the exit code.
+            machine.succeed("sudo -u alex sxmo_appmenu.sh")
+          '';
+        };
+
+        # --- NEW UI TEST: Check for foot terminal process ---
+        sxmo-foot-terminal-test = pkgs.nixosTest {
+          name = "sxmo-foot-terminal-test";
+          nodes.machine = {
+            imports = [
+              ./nixos/common-configuration.nix
+              outputs.nixosModules.sxmo-utils
+            ];
+            virtualisation.graphics = true; # UI tests need graphics
+            environment.systemPackages = [ pkgs.foot pkgs.procps ]; # Add foot for the test, procps for pgrep
+          };
+          testScript = ''
+            machine.start()
+            machine.wait_for_unit("graphical.target")
+            machine.wait_for_unit("sxmo.service")
+
+            # Give the UI plenty of time to draw everything and start initial applications
+            machine.sleep(15)
+
+            # Check if the foot terminal process is running.
+            # This assumes sxmo or its user configuration might start foot.
+            # If not, this test would need adjustment or target a different default UI process.
+            machine.succeed("pgrep -u alex foot")
+          '';
+        };
       });
   };
 }
