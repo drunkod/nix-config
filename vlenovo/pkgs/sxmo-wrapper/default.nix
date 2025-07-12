@@ -47,8 +47,10 @@ sxmo-utils-unwrapped.overrideAttrs (oldAttrs: {
   substituteInPlace scripts/core/sxmo_init.sh \
       --replace "/etc/profile.d/sxmo_init.sh" "${placeholder "out"}/etc/profile.d/sxmo_init.sh"
 
-  substituteInPlace configs/appcfg/sway_template \
-    --replace "exec sxmo_hook_start.sh" "exec ${placeholder "out"}/bin/sxmo_hook_start.sh"
+# Patch the sway config template to use the absolute path for the startup hook.
+# The hooks are installed in the share directory, not bin.
+substituteInPlace configs/appcfg/sway_template \
+  --replace "exec sxmo_hook_start.sh" "exec ${placeholder "out"}/share/sxmo/default_hooks/sxmo_hook_start.sh"
 
   '';
 
