@@ -22,7 +22,10 @@
     forcei686 = true;
   };
   boot.loader.efi.canTouchEfiVariables = false;
-
+  boot.kernelParams = [
+    "systemd.mask=systemd-vconsole-setup.service"
+    "systemd.mask=dev-tpmrm0.device" #this is to mask that stupid 1.5 mins systemd bug
+  ];
   # Common settings for both real and test builds
   networking.hostName = "vlenovo";
   networking.networkmanager.enable = true;
