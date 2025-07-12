@@ -17,36 +17,39 @@ sxmo-utils-unwrapped.overrideAttrs (oldAttrs: {
 
     substituteInPlace setup_config_version.sh \
       --replace "busybox" "${busybox}/bin/busybox"
-      
-    # Fix the sourcing chain by using absolute paths
-    substituteInPlace scripts/core/sxmo_winit.sh \
-      --replace ". sxmo_init.sh" ". ${placeholder "out"}/bin/sxmo_init.sh"
-      
-    substituteInPlace scripts/core/sxmo_init.sh \
-      --replace "/etc/profile.d/sxmo_init.sh" "${placeholder "out"}/etc/profile.d/sxmo_init.sh"
-      
-    substituteInPlace configs/profile.d/sxmo_init.sh \
-      --replace ". sxmo_common.sh" ". ${placeholder "out"}/bin/sxmo_common.sh"
+    
 
-    # *** THE NEW, BETTER FIX IS HERE ***
     # The migration script needs to find all default config files. The original
     # script relies on XDG_DATA_DIRS to find them. We inject the correct path
     # at the top of the script so all subsequent calls to `xdg_data_path` work.
     sed -i '2i export XDG_DATA_DIRS="${placeholder "out"}/share''${XDG_DATA_DIRS:+:}$XDG_DATA_DIRS"' \
       scripts/core/sxmo_migrate.sh
 
-    # Inject the correct runtime PATH into sxmo_common.sh
-    # This remains essential for all scripts after the initial setup.
+    # Inject the full runtime PATH at the top of sxmo_init.sh.
+    # This script is sourced by sxmo_winit.sh (on start) and its `trap`
+    # calls other hooks (on stop), so this ensures the PATH is always set.
     sed -i '2i export PATH="${placeholder "out"}/bin:${lib.makeBinPath ([
-      # Minimal set of dependencies for the UI to function
       (sway.override { withBaseWrapper = true; withGtkWrapper = true; })
       bemenu foot wvkbd swayidle wob mako superd lisgd
-      # We still need coreutils etc. at RUNTIME, not just build time.
-      coreutils gnugrep util-linux jq
+      coreutils gnugrep util-linux jq dbus
       libnotify inotify-tools xdg-user-dirs light
-      # Custom dependencies
       codemadness-frontends yt-dlp
-    ])}''${PATH:+:}$PATH"' scripts/core/sxmo_common.sh
+    ])}''${PATH:+:}$PATH"' scripts/core/sxmo_init.sh
+
+
+  # Use absolute paths to prevent any sourcing issues.
+  substituteInPlace scripts/core/sxmo_winit.sh \
+    --replace ". sxmo_init.sh" ". ${placeholder "out"}/bin/sxmo_init.sh"
+    
+  substituteInPlace configs/profile.d/sxmo_init.sh \
+    --replace ". sxmo_common.sh" ". ${placeholder "out"}/bin/sxmo_common.sh"
+
+  substituteInPlace scripts/core/sxmo_init.sh \
+      --replace "/etc/profile.d/sxmo_init.sh" "${placeholder "out"}/etc/profile.d/sxmo_init.sh"
+
+  substituteInPlace configs/appcfg/sway_template \
+    --replace "exec sxmo_hook_start.sh" "exec ${placeholder "out"}/bin/sxmo_hook_start.sh"
+
   '';
 
   meta = sxmo-utils-unwrapped.meta // {
