@@ -27,19 +27,19 @@ jobs:
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
-      - name: Attempt to enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP=="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger
-          sudo modprobe kvm_intel || sudo modprobe kvm_amd || echo "KVM module (Intel or AMD) not loaded, VM tests might fail."
-          ls -al /dev/kvm || echo "/dev/kvm not found, KVM might not be available."
-          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
-          echo "Current user: $(whoami)"
-          echo "Groups: $(groups)"
-          echo "Checking KVM capability..."
-          sudo apt-get update && sudo apt-get install -y cpu-checker
-          kvm-ok || echo "kvm-ok check failed. Continuing, but VM tests might not run optimally or at all."
+      # - name: Attempt to enable KVM
+      #   run: |
+      #     echo 'KERNEL=="kvm", GROUP=="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+      #     sudo udevadm control --reload-rules
+      #     sudo udevadm trigger
+      #     sudo modprobe kvm_intel || sudo modprobe kvm_amd || echo "KVM module (Intel or AMD) not loaded, VM tests might fail."
+      #     ls -al /dev/kvm || echo "/dev/kvm not found, KVM might not be available."
+      #     if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+      #     echo "Current user: $(whoami)"
+      #     echo "Groups: $(groups)"
+      #     echo "Checking KVM capability..."
+      #     sudo apt-get update && sudo apt-get install -y cpu-checker
+      #     kvm-ok || echo "kvm-ok check failed. Continuing, but VM tests might not run optimally or at all."
 
 
       - name: Run vlenovo Flake Checks
