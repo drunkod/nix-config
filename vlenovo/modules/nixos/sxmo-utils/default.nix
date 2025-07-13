@@ -1,101 +1,278 @@
-# /home/alex/Documents/nix-config/vlenovo/modules/nixos/sxmo-utils/default.nix
+# vlenovo/modules/nixos/sxmo-utils/default.nix
 { lib, pkgs, config, ... }:
 
 with lib;
 
 let
-  # cfg variable to easily access the module's options
   cfg = config.services.xserver.desktopManager.sxmo;
-  # sxmopkgs = import ./mix.nix { inherit pkgs; }; # Removed this line
-  # codemadness-frontends = pkgs.callPackage ./pkgs/codemadness-frontends {};
 in
 
 {
-  # environment.systemPackages = [
-  #   codemadness-frontends
-  # ];
-
   options.services.xserver.desktopManager.sxmo = {
     enable = mkEnableOption "Sxmo (Simple X Mobile) session started via systemd";
 
     user = mkOption {
       description = lib.mdDoc "The user to run the Sxmo session for.";
       type = types.str;
-      example = "alex";
     };
 
     group = mkOption {
       description = lib.mdDoc "The primary group for the Sxmo user.";
       type = types.str;
-      example = "users";
+      default = "users";
     };
   };
 
-  # --- CONFIGURATION ---
-  # This section is activated only if the user enables the module.
-  config = mkIf cfg.enable {
-
-    # Configure logind to let Sxmo's power menu handle power events.
-    services.logind.extraConfig = ''
-      HandlePowerKey=ignore
-      HandlePowerKeyLongPress=poweroff
-    '';
-
-    # Set the default boot target to graphical.
-    systemd.defaultUnit = "graphical.target";
-
-    # Install Sxmo's udev rules for hardware like LEDs and sensors.
-    services.udev.packages = [ pkgs.sxmo-utils ];
-
-    # Ensure the user is in the correct groups to access hardware.
-    users.users.${cfg.user}.extraGroups = [ "input" "video" ];
-
-    # Enable doas and configure it with Sxmo's required permissions.
-    security.doas.enable = lib.mkDefault true;
-    security.doas.extraConfig = builtins.readFile "${pkgs.sxmo-utils}/share/sxmo/configs/doas/sxmo.conf";
-
-    # Megapixels requires this, and bemenu is much more fluent with this
-    hardware.graphics.enable = lib.mkDefault true;
-
-    # Disable the standard text login on TTY1 to prevent conflicts.
-    console.enable = false;
-
-    # --- The Sxmo systemd Service ---
-    # This service starts the entire graphical session.
-    systemd.services.sxmo = {
-      description = "Sxmo graphical session";
-      wantedBy = [ "graphical.target" ];
+  config = mkIf cfg.enable (
+    let
+      userConfig = config.users.users.${cfg.user};
       
-      # This service conflicts with any getty service on tty7.
-      conflicts = [ "getty@tty7.service" ];
-
-      serviceConfig = {
-        # ExecStartPre = "+${pkgs.sxmo-utils}/bin/sxmo_setpermissions.sh"; # Changed sxmopkgs.sxmo-utils to pkgs.sxmo-utils (though it's commented out)
-        ExecStart = "${pkgs.sxmo-utils}/bin/sxmo_winit.sh"; # Changed sxmopkgs.sxmo-utils to pkgs.sxmo-utils
-        User = cfg.user;
-        Group = cfg.group;
-
-        # CRITICAL: Use the "login" PAM profile. This creates a proper,
-        # "seated" user session that systemd-logind recognizes,
-        # which is required for Polkit permissions to work.
-        PAMName = "login";
-        
-        WorkingDirectory = "~";
-        Restart = "always";
-        RestartSec = "2s"; # Add a small delay to prevent rapid-fire crash loops.
-
-        # Standard options to correctly allocate a virtual terminal (VT)
-        # to the graphical session. We use tty7 by convention.
-        TTYPath = "/dev/tty7";
-        TTYReset = "yes";
-        TTYVHangup = "yes";
-        TTYVTDisallocate = "yes";
-        StandardInput = "tty-fail";
-        StandardOutput = "journal";
-        StandardError = "journal";
-        UtmpIdentifier = "tty7";
-        UtmpMode = "user";
+      # Create a wrapped sway with all necessary configuration
+      sway-wrapped = pkgs.sway.override { 
+        withBaseWrapper = true; 
+        withGtkWrapper = true; 
       };
-    };
-  };
+      
+      # Create the sxmo environment file with all necessary variables
+      sxmo-environment-file = pkgs.writeText "sxmo-environment" ''
+        # Core PATH with all required binaries
+        PATH=${pkgs.sxmo-utils}/share/sxmo/default_hooks:${lib.makeBinPath [
+          pkgs.sxmo-utils      # Provides all the sxmo_* scripts
+          sway-wrapped         # Sway window manager
+          pkgs.foot            # Default terminal for Wayland
+          pkgs.bemenu          # Menu system
+          pkgs.wvkbd           # Virtual keyboard for Wayland
+          pkgs.grim            # Screenshot utility
+          pkgs.slurp           # Screen area selection
+          pkgs.wl-clipboard    # Wayland clipboard utilities
+          
+          # Core utilities required by sxmo scripts
+          pkgs.coreutils 
+          pkgs.gnugrep 
+          pkgs.gnused
+          pkgs.gawk
+          pkgs.findutils
+          pkgs.procps 
+          pkgs.psmisc          # For killall
+          pkgs.util-linux      # For various utilities
+          pkgs.busybox         # For additional utilities
+          pkgs.xdg-user-dirs
+          
+          # System services
+          pkgs.dbus 
+          pkgs.superd          # Service manager
+          pkgs.networkmanager
+          pkgs.modemmanager    # For modem functionality
+          
+          # Audio/video utilities
+          pkgs.pamixer 
+          pkgs.pipewire
+          pkgs.pulseaudio
+          
+          # Power management
+          pkgs.upower 
+          pkgs.brightnessctl
+          
+          # Notification and UI utilities
+          pkgs.libnotify 
+          pkgs.dunst           # Notification daemon
+          pkgs.inotify-tools
+          pkgs.conky           # Desktop widget
+          
+          # Additional tools
+          pkgs.jq              # JSON processor
+          pkgs.curl            # HTTP client
+          pkgs.vis             # Default editor
+        ]}
+        
+        # User environment
+        HOME=${userConfig.home}
+        USER=${cfg.user}
+        
+        # XDG directories
+        XDG_CONFIG_HOME=${userConfig.home}/.config
+        XDG_DATA_HOME=${userConfig.home}/.local/share
+        XDG_CACHE_HOME=${userConfig.home}/.cache
+        XDG_STATE_HOME=${userConfig.home}/.local/state
+        XDG_RUNTIME_DIR=/run/user/${toString userConfig.uid}
+        XDG_DATA_DIRS=${pkgs.sxmo-utils}/share:/usr/share:$XDG_DATA_DIRS
+        
+        # Sxmo specific variables
+        SXMO_WM=sway
+        SXMO_TERMINAL=foot
+        KEYBOARD=wvkbd-mobintl
+        SXMO_DEVICE_NAME=desktop
+        SXMO_OS=nixos
+        SXMO_CACHEDIR=${userConfig.home}/.cache/sxmo
+        SXMO_LOGDIR=${userConfig.home}/.local/share/modem
+        SXMO_NOTIFDIR=${userConfig.home}/.local/share/sxmo/notifications
+        SXMO_STATE=${userConfig.home}/.local/state/sxmo.state
+        
+        # Wayland specific
+        MOZ_ENABLE_WAYLAND=1
+        SDL_VIDEODRIVER=wayland
+        XDG_CURRENT_DESKTOP=sway
+        XDG_SESSION_TYPE=wayland
+        XDG_SESSION_DESKTOP=sway
+        
+        # Hardware compatibility
+        # WLR_RENDERER=pixman
+        # WLR_NO_HARDWARE_CURSORS=1
+
+        # Hardware compatibility
+        # For VMs, we need to use the DRM backend
+        WLR_BACKENDS=drm
+        WLR_RENDERER=gles2 
+        WLR_RENDERER_ALLOW_SOFTWARE=1       
+        
+        # Menu configuration
+        SXMO_MENU=bemenu
+        BEMENU_OPTS="--fn 'monospace 14'"
+      '';
+    in
+    {
+      # System configuration for sxmo
+      services.logind.extraConfig = ''
+        HandlePowerKey=ignore
+        HandlePowerKeyLongPress=poweroff
+      '';
+
+      systemd.defaultUnit = "graphical.target";
+      
+      # Install udev rules
+      services.udev.packages = [ pkgs.sxmo-utils ];
+      
+      # Configure user groups
+      users.users.${cfg.user}.extraGroups = [ 
+        "input" 
+        "video" 
+        "audio" 
+        "network" 
+        "networkmanager"
+        "power" 
+        "wheel"
+      ];
+      
+      # Enable doas with sxmo configuration
+     security.doas.enable = lib.mkDefault true;
+      security.doas.extraConfig = ''
+        # Allow wheel group to run commands as root
+        permit persist :wheel
+        
+        # Sxmo-specific doas rules will be included if the package provides them
+        # The actual file check happens at runtime, not build time
+      '';
+      
+      # Disable getty on tty7 to avoid conflicts
+      systemd.services."getty@tty7".enable = false;
+
+      # Create necessary directories
+       systemd.tmpfiles.rules = [
+
+         # User home directories
+        "d ${userConfig.home}/.cache 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.cache/sxmo 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.config 0755 ${cfg.user} ${cfg.group} -"
+         "d ${userConfig.home}/.config/sxmo 0755 ${cfg.user} ${cfg.group} -"
+         "d ${userConfig.home}/.config/sxmo/hooks 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.local 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.local/share 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.local/share/sxmo 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.local/share/modem 0755 ${cfg.user} ${cfg.group} -"
+        "d ${userConfig.home}/.local/state 0755 ${cfg.user} ${cfg.group} -"
+       ];
+
+      hardware.graphics.enable = lib.mkDefault true;
+
+      # The main sxmo service
+      systemd.services.sxmo = {
+        description = "Sxmo graphical session";
+        wantedBy = [ "graphical.target" ];
+        conflicts = [ "getty@tty7.service" ];
+        after = [ 
+          "systemd-user-sessions.service" 
+          "systemd-logind.service" 
+          "network.target"
+          "systemd-tmpfiles-setup.service"  # Ensure directories are created first
+        ];
+        
+        # Create a pre-start script to ensure directories exist
+        preStart = ''
+          # Ensure user directories exist with correct permissions
+          mkdir -p ${userConfig.home}/.cache/sxmo
+          mkdir -p ${userConfig.home}/.config/sxmo/hooks
+          mkdir -p ${userConfig.home}/.local/share/sxmo
+          mkdir -p ${userConfig.home}/.local/share/modem
+          mkdir -p ${userConfig.home}/.local/state
+          
+          # Fix ownership
+          chown -R ${cfg.user}:${cfg.group} ${userConfig.home}/.cache
+          chown -R ${cfg.user}:${cfg.group} ${userConfig.home}/.config
+          chown -R ${cfg.user}:${cfg.group} ${userConfig.home}/.local
+        '';
+        
+        serviceConfig = {
+          Type = "simple";
+          EnvironmentFile = sxmo-environment-file;
+          ExecStart = ''
+            ${pkgs.dbus}/bin/dbus-run-session ${pkgs.sxmo-utils}/bin/sxmo_winit.sh
+          '';
+          User = cfg.user;
+          Group = cfg.group;
+          PAMName = "login";
+          WorkingDirectory = userConfig.home;
+          Restart = "always";
+          RestartSec = "2s";
+          
+          # TTY configuration
+          TTYPath = "/dev/tty7";
+          TTYReset = "yes";
+          TTYVHangup = "yes";
+          TTYVTDisallocate = "yes";
+          StandardInput = "tty-fail";
+          StandardOutput = "journal";
+          StandardError = "journal";
+          UtmpIdentifier = "tty7";
+          UtmpMode = "user";
+          
+          # Capabilities
+          AmbientCapabilities = "CAP_SYS_TTY_CONFIG";
+          
+          # Run the preStart script as root
+          PermissionsStartOnly = true;
+        };
+      };
+
+      # Install required packages system-wide
+      environment.systemPackages = with pkgs; [
+        sxmo-utils
+        sway-wrapped
+        foot
+        bemenu
+        wvkbd
+        #dunst
+        conky
+        superd
+        lisgd
+        mnc
+        vis           # Default editor
+        jq            # Add explicitly
+        inotify-tools # Add explicitly
+        xdg-user-dirs        
+      ];
+
+      # Enable required services
+      services.pipewire = {
+        enable = true;
+        alsa.enable = true;
+        pulse.enable = true;
+      };
+
+      # ModemManager for cellular functionality
+      # services.modemmanager.enable = true;
+
+      # Enable geoclue for location services
+      services.geoclue2.enable = true;
+    }
+  );
 }
