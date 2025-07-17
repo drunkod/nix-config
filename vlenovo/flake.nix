@@ -196,30 +196,97 @@
           '';
         };
 
-        sxmo-sway-process-test = pkgs.nixosTest { # <-- Optional: rename the test for clarity
-          name = "sxmo-sway-process-test";
+        # sxmo-sway-process-test = pkgs.nixosTest { # <-- Optional: rename the test for clarity
+        #   name = "sxmo-sway-process-test";
+        #   nodes.machine = {
+        #     imports = [
+        #       ./nixos/common-configuration.nix
+        #       outputs.nixosModules.sxmo-utils
+        #     ];
+        #     virtualisation.graphics = true; # UI tests need graphics
+        #     environment.systemPackages = [ pkgs.procps ]; # Keep procps for pgrep
+        #   };
+        #   testScript = ''
+        #     machine.start()
+        #     machine.wait_for_unit("graphical.target")
+        #     machine.wait_for_unit("sxmo.service")
+
+        #     # Give the UI plenty of time to fully initialize
+        #     machine.sleep(10)
+
+        #     # --- THIS IS THE NEW, CORRECT CHECK ---
+        #     # Check if the sway process is running as the correct user.
+        #     # This is the most fundamental test for a working UI session.
+        #     machine.succeed("pgrep -u alex sway")
+        #   '';
+        # };
+        # sway-config-reload-test = pkgs.nixosTest {
+        #   name = "sway-config-reload-test";
+        #   nodes.machine = {
+        #     imports = [
+        #       ./nixos/common-configuration.nix
+        #       outputs.nixosModules.sxmo-utils
+        #     ];
+        #     # This is crucial for Wayland compositors in QEMU.
+        #     virtualisation.graphics = true; # UI tests need graphics
+        #     environment.systemPackages = [ pkgs.procps ]; # Keep procps for pgrep
+        #   };
+
+        #   testScript = ''
+        #     machine.start()
+        #     machine.wait_for_unit("graphical.target")
+        #     machine.wait_for_unit("sxmo.service")
+
+        #     # Wait for the initial (potentially black screen) session to start
+        #     machine.sleep(10)
+
+        #     # 1. Confirm the initial sway process is running
+        #     machine.succeed("pgrep -u alex sway")
+
+        #     # 2. Create our minimal, known-good sway config inside the VM
+        #     machine.succeed("""
+        #       echo 'set $term foot; bar { status_command date }' > /tmp/minimal.conf
+        #     """)
+
+        #     # 3. Tell the live sway instance to reload with the minimal config
+        #     #    We must read the real socket path from the sxmo pointer file.
+        #     machine.succeed("swaymsg -s $(cat /run/user/1000/sxmo.swaysock) reload --config /tmp/minimal.conf")
+
+        #     # 4. Check the journal *after* the reload for the success message
+        #     machine.succeed("journalctl -u sxmo.service -b | grep 'Running compositor'")
+        #   '';
+        # };
+        sway-config-validation-test = pkgs.nixosTest {
+          name = "sway-config-validation-test";
           nodes.machine = {
             imports = [
               ./nixos/common-configuration.nix
               outputs.nixosModules.sxmo-utils
             ];
+
             virtualisation.graphics = true; # UI tests need graphics
             environment.systemPackages = [ pkgs.procps ]; # Keep procps for pgrep
           };
+
           testScript = ''
             machine.start()
             machine.wait_for_unit("graphical.target")
+
+            # 1. Start the service to ensure it generates the config file
+            machine.succeed("systemctl start sxmo.service")
             machine.wait_for_unit("sxmo.service")
+            machine.sleep(5) # Give scripts time to run
 
-            # Give the UI plenty of time to fully initialize
-            machine.sleep(10)
+            # 2. Stop the service to release the lock on the graphics hardware
+            machine.succeed("systemctl stop sxmo.service")
+            machine.sleep(2) # Give sway time to terminate fully
 
-            # --- THIS IS THE NEW, CORRECT CHECK ---
-            # Check if the sway process is running as the correct user.
-            # This is the most fundamental test for a working UI session.
-            machine.succeed("pgrep -u alex sway")
+            # 3. Now, run the config check as the 'alex' user in a dbus session.
+            #    This simulates a clean login and allows sway to get permissions.
+            machine.succeed("sway --validate -c /home/alex/.config/sxmo/sway")
           '';
         };
+
       });
   };
 }

@@ -32,10 +32,14 @@ in
         withBaseWrapper = true; 
         withGtkWrapper = true; 
       };
+
+
       
       # Create the sxmo environment file with all necessary variables
       sxmo-environment-file = pkgs.writeText "sxmo-environment" ''
-        # Core PATH with all required binaries
+        # Let systemd handle USER, HOME, and XDG_RUNTIME_DIR.
+        # We only need to provide the PATH and Sxmo-specific variables.
+        
         PATH=${pkgs.sxmo-utils}/share/sxmo/default_hooks:${lib.makeBinPath [
           pkgs.sxmo-utils      # Provides all the sxmo_* scripts
           sway-wrapped         # Sway window manager
@@ -85,17 +89,11 @@ in
           pkgs.vis             # Default editor
         ]}
         
-        # User environment
-        HOME=${userConfig.home}
-        USER=${cfg.user}
-        
-        # XDG directories
+        # We still need to set these XDG variables relative to the user's home.
         XDG_CONFIG_HOME=${userConfig.home}/.config
         XDG_DATA_HOME=${userConfig.home}/.local/share
         XDG_CACHE_HOME=${userConfig.home}/.cache
         XDG_STATE_HOME=${userConfig.home}/.local/state
-        XDG_RUNTIME_DIR=/run/user/${toString userConfig.uid}
-        XDG_DATA_DIRS=${pkgs.sxmo-utils}/share:/usr/share:$XDG_DATA_DIRS
         
         # Sxmo specific variables
         SXMO_WM=sway
@@ -103,10 +101,6 @@ in
         KEYBOARD=wvkbd-mobintl
         SXMO_DEVICE_NAME=desktop
         SXMO_OS=nixos
-        SXMO_CACHEDIR=${userConfig.home}/.cache/sxmo
-        SXMO_LOGDIR=${userConfig.home}/.local/share/modem
-        SXMO_NOTIFDIR=${userConfig.home}/.local/share/sxmo/notifications
-        SXMO_STATE=${userConfig.home}/.local/state/sxmo.state
         
         # Wayland specific
         MOZ_ENABLE_WAYLAND=1
@@ -115,17 +109,10 @@ in
         XDG_SESSION_TYPE=wayland
         XDG_SESSION_DESKTOP=sway
         
-        # Hardware compatibility
-        # WLR_RENDERER=pixman
-        # WLR_NO_HARDWARE_CURSORS=1
-
-        # Hardware compatibility
-        # For VMs, we need to use the DRM backend
         WLR_BACKENDS=drm
         WLR_RENDERER=gles2 
         WLR_RENDERER_ALLOW_SOFTWARE=1       
         
-        # Menu configuration
         SXMO_MENU=bemenu
         BEMENU_OPTS="--fn 'monospace 14'"
       '';
@@ -137,6 +124,11 @@ in
         HandlePowerKeyLongPress=poweroff
       '';
 
+      environment.etc."sway/config.d/00-nixos-output.conf".text = ''
+        # Configure all outputs with a standard mode.
+        output * bg #000000 solid_color
+      '';
+      
       systemd.defaultUnit = "graphical.target";
       
       # Install udev rules
@@ -213,7 +205,9 @@ in
         
         serviceConfig = {
           Type = "simple";
+ 
           EnvironmentFile = sxmo-environment-file;
+ 
           ExecStart = ''
             ${pkgs.dbus}/bin/dbus-run-session ${pkgs.sxmo-utils}/bin/sxmo_winit.sh
           '';
