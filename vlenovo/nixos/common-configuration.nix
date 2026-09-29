@@ -34,7 +34,6 @@
   users.users.alex = {
     isNormalUser = true;
     extraGroups = [ "networkmanager" "wheel" "input" "video" ];
-    password = "test";
     shell = pkgs.bash; # Use a standard shell.
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDV45EkSp+b5fraVf5vDDUbuu2O7kVGxDn+8O6y/xcxh alex@gmail.com"
@@ -82,8 +81,9 @@
   services.openssh = {
     enable = true;
     settings = {
-      PermitRootLogin = "prohibit-password";
-      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      PasswordAuthentication = true;
+      KbdInteractiveAuthentication = false;
     };
   };
 
